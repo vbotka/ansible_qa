@@ -1,0 +1,45 @@
+# https://stackoverflow.com/questions/60525961/removing-empty-values-from-a-list-and-assigning-it-to-a-new-list/60526774#60526774
+
+# Q: Remove empty values from list1 ["a", "b", "", "7", ""]
+- name: "A: Use the filter select."
+  vars:
+    list1: ["a", "b", "", "7", ""]
+    list2: "{{ list1 | select() }}"
+    result: [a, b, '7']
+  block:
+
+    - debug:
+        var: list2 | to_yaml
+    - assert:
+        quiet: true
+        that: list2 == result
+        fail_msg: "[ERR] The result {{ list2 }} does not match {{ result }}"
+
+# Q: If an element is 0 or False ?
+- name: "A: Both 0 and False evaluate to boolean False. The filter select will remove them too"
+  vars:
+    list1: ["a", "b", 0, "7", false, ""]
+    list2: "{{ list1 | select() }}"
+    result: [a, b, '7']
+  block:
+
+    - debug:
+        var: list2 | to_yaml
+    - assert:
+        quiet: true
+        that: list2 == result
+        fail_msg: "[ERR] The result {{ list2 }} does not match {{ result }}"
+
+- name: "A: To reject empty strings only use the test match"
+  vars:
+    list1: ["a", "b", 0, "7", false, ""]
+    list2: "{{ list1 | reject('match', '^$') }}"
+    result: [a, b, 0, '7', false]
+  block:
+
+    - debug:
+        var: list2 | to_yaml
+    - assert:
+        quiet: true
+        that: list2 == result
+        fail_msg: "[ERR] The result {{ list2 }} does not match {{ result }}"

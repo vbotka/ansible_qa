@@ -1,0 +1,5 @@
+- hosts: localhost
+
+  tasks:
+
+    - include_tasks: so-60525961.yml
