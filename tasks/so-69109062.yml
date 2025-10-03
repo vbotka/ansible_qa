@@ -5,6 +5,9 @@
   vars:
     distromajor: "{{ ansible_facts.distribution_major_version | int }}"
     distromajor_type: "{{ distromajor | type_debug }}"
+    my_dict_yaml: |
+      distromajor: {{ ansible_facts.distribution_major_version }}
+    my_dict: "{{ my_dict_yaml | from_yaml }}"
   block:
 
     - setup:
@@ -17,6 +20,11 @@
         quiet: true
         that: distromajor_type == 'AnsibleUnsafeText'
         fail_msg: "[ERR] distromajor_type is not AnsibleUnsafeText"
+
+    - debug:
+        var: my_dict.distromajor
+    - debug:
+        var: my_dict.distromajor | type_debug
 
 - name: "No Jinja expression preserves the variable's type."
   vars:

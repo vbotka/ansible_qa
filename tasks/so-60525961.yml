@@ -1,4 +1,4 @@
-# https://stackoverflow.com/questions/60525961/removing-empty-values-from-a-list-and-assigning-it-to-a-new-list/60526774#60526774
+# https://stackoverflow.com/questions/60525961/removing-empty-values-from-a-list-and-assigning-it-to-a-new-list/60526774
 
 # Q: Remove empty values from list1 ["a", "b", "", "7", ""]
 - name: "A: Use the filter select."
