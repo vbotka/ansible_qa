@@ -1,0 +1,51 @@
+# https://stackoverflow.com/questions/69109062/cant-set-ansible-fact-as-integer/69109779
+
+# Q: Why can I not save the distro major version as an int?
+- name: "A: Ansible decided you can't"
+  vars:
+    distromajor: "{{ ansible_facts.distribution_major_version | int }}"
+    distromajor_type: "{{ distromajor | type_debug }}"
+  block:
+
+    - setup:
+        gather_subset: distribution_major_version
+    - debug:
+        var: distromajor
+    - debug:
+        var: distromajor_type
+    - assert:
+        quiet: true
+        that: distromajor_type == 'AnsibleUnsafeText'
+        fail_msg: "[ERR] distromajor_type is not AnsibleUnsafeText"
+
+- name: "No Jinja expression preserves the variable's type."
+  vars:
+    v1: 123
+    v2: "{{ v1 }}"
+    v2_type: "{{ v2 | type_debug }}"
+  block:
+
+    - debug:
+        var: v2
+    - debug:
+        var: v2_type
+    - assert:
+        quiet: true
+        that: v2_type == 'int'
+        fail_msg: "[ERR] v2_type is not int"
+
+- name: "Jinja expression returns a string."
+  vars:
+    v1: 123
+    v2: "{{ v1 + 1 }}"
+    v2_type: "{{ v2 | type_debug }}"
+  block:
+
+    - debug:
+        var: v2
+    - debug:
+        var: v2_type
+    - assert:
+        quiet: true
+        that: v2_type == 'str'
+        fail_msg: "[ERR] v2_type is not str"

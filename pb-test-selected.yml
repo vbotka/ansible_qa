@@ -1,0 +1,24 @@
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Execute selected tasks. For example:
+#
+# (env) > ansible-playbook pb-test-selected.yml -e s="so-60525961,so-69109062"
+# 
+# Suppress ok status:
+# (env) > ANSIBLE_DISPLAY_OK_HOSTS=false ansible-playbook pb-test-selected.yml -e s="so-60525961,so-69109062"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# https://github.com/vbotka/ansible_qa/blob/master/pb-test-selected.yml
+
+- hosts: localhost
+
+  vars:
+
+    selected: "{{ s | d('') | split(',') | select }}"
+
+  tasks:
+
+#   - debug:
+#       msg: |
+#         selected tasks: {{ selected | join(', ') }}
+
+    - include_tasks: "tasks/{{ item }}.yml"
+      loop: "{{ selected }}"
