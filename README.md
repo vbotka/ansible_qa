@@ -9,7 +9,7 @@ versions.
 The below command runs all tasks
 
 ```console
-shell> ansible-playbook pb-test.yml
+(env) > ansible-playbook pb-test.yml
 ```
 
 ### Suppress the OK status
@@ -17,7 +17,7 @@ shell> ansible-playbook pb-test.yml
 The below command runs all tasks
 
 ```console
-shell> ANSIBLE_DISPLAY_OK_HOSTS=false ansible-playbook pb-test.yml
+(env) > ANSIBLE_DISPLAY_OK_HOSTS=false ansible-playbook pb-test.yml
 ```
 
 ## Run selected tasks
@@ -25,5 +25,5 @@ shell> ANSIBLE_DISPLAY_OK_HOSTS=false ansible-playbook pb-test.yml
 The below command runs selected tasks. For example, so-60525961 and so-69109062
 
 ```console
-ansible-playbook pb-test-selected.yml -e s="so-60525961,so-69109062"
+(env) ansible-playbook pb-test-selected.yml -e s="so-60525961,so-69109062"
 ```
