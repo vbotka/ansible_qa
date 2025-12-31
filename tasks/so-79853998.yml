@@ -1,0 +1,27 @@
+# https://stackoverflow.com/questions/79853998/ansible-way-to-convert-stdout-lines-to-a-dictionnary-keeping-multilines-under-th
+
+# Q: Convert illnes to a dictionary
+
+# A: <TBD>
+
+- block:
+
+    - debug:
+        var: result
+
+  vars:
+    data: |
+      Param1 : Value1
+      Param2 : Value2
+      Param3 : Value3a
+             : Value3b
+             : Value3c
+      Param4 : Value4
+    result: |
+      {% for i in data.splitlines() %}
+      {% if i.0 != ' ' %}
+      {{ i }}
+      {% else %}
+      {{ i }}
+      {% endif %}
+      {% endfor %}
