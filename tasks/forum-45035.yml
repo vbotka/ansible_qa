@@ -1,0 +1,36 @@
+# https://forum.ansible.com/t/constructing-tuple-list-string-with-templated-variables-gets-converted-to-a-list-of-lists/45035
+
+# Q: Construct a list of tuples.
+#    [('xkb', 'gb+mac'), ('ibus', 'mozc-jp')]
+# A: <TBD>
+
+- block:
+
+    - debug:
+        var: result
+
+    - copy:
+        dest: /tmp/test.dconf
+        content: |
+          {{ result }}
+
+  vars:
+    
+    languages:
+      english:
+        packages: []
+        dconf_source:
+          - xkb
+          - gb+mac
+      japanese:
+        packages:
+          - ibus-mozc
+          - mozc-utils-gui
+        dconf_source:
+          - ibus
+          - mozc-jp
+
+    result: |
+      [{% for k,v in languages.items() -%}
+      ({{ v.dconf_source | map('to_json') | join(', ') }}), 
+      {%- endfor %}]
