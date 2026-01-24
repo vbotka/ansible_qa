@@ -1,0 +1,20 @@
+# https://stackoverflow.com/questions/79874782/how-to-execute-ansible-one-host-group-at-a-time
+
+# Q: How to execute ansible one host group at a time ?
+
+- name: Import roles conditionally.
+  hosts: all
+
+  tasks:
+
+    - import_role:
+        name: test
+      when: inventory_hostname in groups.HG1
+
+    - import_role:
+        name: test
+      when: inventory_hostname in groups.HG2
+
+    - import_role:
+        name: test
+      when: inventory_hostname in groups.HG3
