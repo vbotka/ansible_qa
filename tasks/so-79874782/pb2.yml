@@ -1,0 +1,11 @@
+# https://stackoverflow.com/questions/79874782/how-to-execute-ansible-one-host-group-at-a-time
+
+# Q: How to execute ansible one host group at a time ?
+
+- name: Include roles conditionally.
+  hosts: all
+  
+  tasks:
+
+    - include_tasks: include_role.yml
+      loop: [HG1, HG2, HG3]
