@@ -1,0 +1,44 @@
+# https://forum.ansible.com/t/omit-and-the-dict-lookup/45197
+
+- debug:
+    msg: "{{ evens | product([omit]) }}"
+  vars:
+    evens: [twos, fours]
+
+# ok: [localhost] => 
+#     msg:
+#     -   - twos
+#     -   - fours
+
+- debug:
+    msg: "{{ d1 | combine(d2) }}"
+  vars:
+    d1: {x: foo, y: bar, z: baz}
+    d2: {x: foo, y: omit}
+
+# ok: [localhost] => 
+#     msg:
+#         x: foo
+#         y: omit
+#         z: baz
+
+# [WARNING]: The loop variable 'item' is already in use.
+# Origin: <unknown>
+# ...
+
+- debug:
+    msg: "User {{ item.key }} is {{ item.value.name }} ({{ item.value.telephone }})"
+  loop: "{{ users | dict2items }}"
+  vars:
+    users:
+      alice:
+        name: Alice Appleworth
+        telephone: 123-456-7890
+      bob:
+        name: Bob Bananarama
+        telephone: 987-654-3210
+
+# ok: [localhost] => (item={'key': 'alice', 'value': {'name': 'Alice Appleworth', 'telephone': '123-456-7890'}}) => 
+#     msg: User alice is Alice Appleworth (123-456-7890)
+# ok: [localhost] => (item={'key': 'bob', 'value': {'name': 'Bob Bananarama', 'telephone': '987-654-3210'}}) => 
+#     msg: User bob is Bob Bananarama (987-654-3210)
