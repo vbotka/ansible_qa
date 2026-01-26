@@ -22,13 +22,12 @@
 #         y: omit
 #         z: baz
 
-# [WARNING]: The loop variable 'item' is already in use.
-# Origin: <unknown>
-# ...
-
 - debug:
-    msg: "User {{ item.key }} is {{ item.value.name }} ({{ item.value.telephone }})"
+    msg: "User {{ my_item.key }} is {{ my_item.value.name }} ({{ my_item.value.telephone }})"
   loop: "{{ users | dict2items }}"
+  loop_control:
+    loop_var: my_item
+    label: "{{ my_item.key }}"
   vars:
     users:
       alice:
@@ -38,7 +37,7 @@
         name: Bob Bananarama
         telephone: 987-654-3210
 
-# ok: [localhost] => (item={'key': 'alice', 'value': {'name': 'Alice Appleworth', 'telephone': '123-456-7890'}}) => 
+# ok: [localhost] => (item=alice) => 
 #     msg: User alice is Alice Appleworth (123-456-7890)
-# ok: [localhost] => (item={'key': 'bob', 'value': {'name': 'Bob Bananarama', 'telephone': '987-654-3210'}}) => 
+# ok: [localhost] => (item=bob) => 
 #     msg: User bob is Bob Bananarama (987-654-3210)
