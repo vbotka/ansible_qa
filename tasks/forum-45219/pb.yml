@@ -1,0 +1,50 @@
+# https://forum.ansible.com/t/combine-ansible-builtin-set-fact-and-with-items-loop/45219
+
+# Q: Extract the data and write it to the existing fields of the array.
+
+- hosts: localhost
+
+  vars:
+
+    mo_filenames: "{{ out.files
+                      | map(attribute='path')
+                      | map('basename') }}"
+    mo_customers: "{{ mo_filenames
+                      | map('split', '.')
+                      | map('first')
+                      | unique
+                      | sort }}"
+    mo_dict: |
+      {% filter from_yaml %}
+      {% for c in mo_customers %}
+      {{ c[1:] }}: {{ mo_filenames | select('match', c) }}
+      {% endfor %}
+      {% endfilter %}
+
+  tasks:
+
+    - find:
+        paths: "{{ playbook_dir }}/{{ mo_path }}"
+      register: out
+      vars:
+        mo_path: srv/orders/local
+
+    - debug:
+        var: out.files
+
+    - debug:
+        var: mo_filenames
+
+    - debug:
+        var: mo_customers
+
+    - debug:
+        var: mo_dict
+
+    - debug:
+        msg: >
+          Customer: {{ item.market_order_name }}
+          Orders: {{ mo_dict[item.market_order_name] | d([]) }}"
+      loop: "{{ customers }}"
+      loop_control:
+        label: "{{ item.market_order_name }}"
