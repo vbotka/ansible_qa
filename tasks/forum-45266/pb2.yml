@@ -1,0 +1,50 @@
+# https://forum.ansible.com/t/different-messages-for-different-conditions-in-one-assert/45266
+
+- hosts: localhost
+
+  vars:
+
+    extended_conditions:
+      message: "{{ one | d(true) | bool }}"
+      this condition failed: "{{ two | d(true) | bool }}"
+
+  tasks:
+
+    - debug:
+        var: extended_conditions.values()
+
+    - assert:
+        that: extended_conditions.values() is all
+        fail_msg: "Following conditions failed: {{ _failed }}"
+        success_msg: "All conditions passed: {{ _passed }}"
+      vars:
+        _failed: "{{ extended_conditions.keys()
+                     | difference(_passed)
+                     | join('; ') }}"
+        _passed: "{{ extended_conditions
+                     | dict2items
+                     | selectattr('value')
+                     | map(attribute='key')
+                     | join('; ') }}"
+
+# (penv) > ansible-playbook pb.yml
+# 
+# ok: [localhost] => 
+#     changed: false
+#     msg: 'All conditions passed: [''message'', ''this condition failed'']'
+
+# (penv) > ansible-playbook pb.yml -e two=false
+# 
+# [ERROR]: Task failed: Action failed: Following conditions failed: this condition failed
+# Origin: /export/scratch/vbotka/vbotka.ansible_qa/tasks/forum-45266/pb.yml:16:7
+# 
+# 14         var: extended_conditions.values()
+# 15
+# 16     - assert:
+#          ^ column 7
+# 
+# fatal: [localhost]: FAILED! => 
+#     assertion: extended_conditions.values() is all
+#     changed: false
+#     evaluated_to: false
+#     msg: 'Following conditions failed: this condition failed'
