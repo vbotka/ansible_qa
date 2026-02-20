@@ -1,0 +1,10 @@
+# https://stackoverflow.com/questions/58363489/why-does-default-none-not-always-appear-to-produce-none
+
+- name: Why does default(None) not always appear to produce None
+  vars:
+    bar: "{{ foo | default(None) }}"
+  block:
+
+    - debug:
+        msg: bar is empty string
+      when: bar | length == 0
