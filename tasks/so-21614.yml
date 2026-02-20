@@ -2,11 +2,17 @@
 
 # Q: I can easily get the dev using blkid -U {{ item.uuid }}, but I don't know how to work it into the task.
 
-- block:
+- name: "A: Run the command in the loop, register the results, and create a dictionary uuid/dev."
+  vars:
+    disks:
+      - uuid: 819dc99e-b433-4e10-a5a8-00c2b9bdfdaa
+    uuid_dev: "{{ dict(out.results | json_query('[].[item.uuid, stdout]')) }}"
+  block:
 
     - command: "blkid -U {{ item.uuid }}"
       loop: "{{ disks }}"
       register: out
+      changed_when: false
 
     - debug:
         var: uuid_dev
@@ -14,8 +20,3 @@
     - debug:
         msg: "Do whatever you want with the dev: {{ uuid_dev[item.uuid] }}"
       loop: "{{ disks }}"
-
-  vars:
-    disks:
-      - uuid: 819dc99e-b433-4e10-a5a8-00c2b9bdfdaa
-    uuid_dev: "{{ dict(out.results | json_query('[].[item.uuid, stdout]')) }}"

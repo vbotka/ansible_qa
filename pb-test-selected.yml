@@ -20,5 +20,7 @@
 #       msg: |
 #         selected tasks: {{ selected | join(', ') }}
 
-    - include_tasks: "tasks/{{ item }}.yml"
+    - include_tasks: "tasks/{{ outer_item }}.yml"
       loop: "{{ selected }}"
+      loop_control:
+        loop_var: outer_item

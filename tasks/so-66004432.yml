@@ -1,0 +1,52 @@
+# https://stackoverflow.com/questions/66004432/issue-with-using-omit-option
+
+# Q: How to pass absolutely no value where it is passing omit_place_holder ?
+- name: "A1: Some filters also work with omit as expected."
+  vars:
+    test:
+      - "{{ var1 | default(false) }}"
+      - "{{ var1 | default(omit) }}"
+    v2: "{{ var1 | default(false) }}"
+    v3: "{{ var1 | default(omit) }}"
+  block:
+
+    - name: Iterate list
+      debug:
+        msg: "{{ {'a': item} | combine({'b': true}) }}"
+      loop: "{{ test }}"
+    - name: 1st item
+      debug:
+        msg: "{{ {'a': v2} | combine({'b': true}) }}"
+    - name: 2nd item
+      debug:
+        msg: "{{ {'a': v3} | combine({'b': true}) }}"
+
+    - debug:
+        msg: "{{ item is defined }}"
+      loop: "{{ test }}"
+
+    - debug:
+        msg: "{{ item | type_debug }}"
+      loop: "{{ test }}"
+
+- name: "A2: No value in Ansible is YAML null."
+  vars:
+    my_int_L4: bob
+    profiles:
+      - "{{ my_int_L4 }}"
+      - "{{ my_int_http | default(null) }}"
+  block:
+
+    - debug:
+        var: profiles
+
+- name: "A2: No value in Ansible is YAML null. Use None instead."
+  vars:
+    my_int_L4: bob
+    profiles:
+      - "{{ my_int_L4 }}"
+      - "{{ my_int_http | default(None) }}"
+  block:
+
+    - debug:
+        var: profiles
