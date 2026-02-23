@@ -1,0 +1,75 @@
+# https://github.com/ansible-collections/community.general/pull/11536
+
+# merge_variables: extended merge capabilities added
+
+- block:
+
+    - debug:
+        var: result
+
+  vars:
+    testa__test_dict:
+      ports:
+        - 1
+    testb__test_dict:
+      ports:
+        - 3
+    result: "{{ lookup('community.general.merge_variables',
+                       '__test_dict',
+                       pattern_type='suffix') }}"
+
+- block:
+
+    - debug:
+        var: result
+
+  vars:
+    testa_test:
+      ports:
+        - 1
+    testb_test:
+      ports:
+        - 3
+    result: |
+      {% for v in lookup('varnames', '.*_test').split(',') %}
+      {{ lookup('vars', v) }}
+      {% endfor %}
+
+- block:
+
+    - debug:
+        var: result
+
+  vars:
+    testdict1__test_dict:
+      a:
+        a:
+          x: low_value
+          y: low_value
+          list:
+            - low_value
+      b:
+        - 1
+        - 1
+        - 2
+        - 3
+    testdict2__test_dict:
+      a:
+        a:
+          y: high_value
+          z: high_value
+          list:
+            - high_value
+      b:
+        - 3
+        - 4
+        - 4
+        - '5': value
+    result: "{{ lookup('community.general.merge_variables',
+                       '__test_dict',
+                       override='ignore',
+                       pattern_type='suffix',
+                       dict_type='deep',
+                       list_merge='append',
+                       default_merge='replace',
+                       list_transformations=['dedup']) }}"

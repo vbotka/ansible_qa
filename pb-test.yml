@@ -17,3 +17,4 @@
     - include_tasks: tasks/so-66004432.yml
     - include_tasks: tasks/so-69109062.yml
     - include_tasks: tasks/so-79853998.yml
+    - include_tasks: tasks/pr-11536.yml
