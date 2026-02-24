@@ -1,10 +1,51 @@
 # https://stackoverflow.com/questions/58363489/why-does-default-none-not-always-appear-to-produce-none
 
-- name: Why does default(None) not always appear to produce None
+# Q: Why does default(None) not always appear to produce None
+
+# [ERROR]: Task failed: The filter plugin 'ansible.builtin.length' failed:
+# object of type 'NoneType' has no len()
+- name: "A: None evaluates to null"
   vars:
     bar: "{{ foo | default(None) }}"
   block:
-
     - debug:
         msg: bar is empty string
       when: bar | length == 0
+  rescue:
+    - debug:
+        msg: "{{ ansible_failed_result }}"
+
+# ALLOW_BROKEN_CONDITIONALS does not work as expected
+# https://docs.ansible.com/projects/ansible/latest/reference_appendices/config.html#allow-broken-conditionals
+# Description
+# When enabled, this option allows conditionals with non-boolean results
+# to be used. A deprecation warning will be emitted in these cases. By
+# default, non-boolean conditionals result in an error. Such results
+# often indicate unintentional use of templates where they are not
+# supported, resulting in a conditional that is always true. When this
+# option is enabled, conditional expressions which are a literal None or
+# empty string will evaluate as true for backwards compatibility.
+
+        
+- name: "A: None evaluates to null"
+  vars:
+    bar: "{{ foo | default(None) }}"
+  block:
+    - debug:
+        msg: "{{ bar | ternary('True', 'False') }}"
+
+- name: "A: None evaluates to null"
+  vars:
+    bar: ''
+  block:
+    - debug:
+        msg: "{{ bar | ternary('True', 'False') }}"
+
+# 1) By default (ANSIBLE_ALLOW_BROKEN_CONDITIONALS=false) there is no deprecation warning.
+
+# 2) When enabled (ANSIBLE_ALLOW_BROKEN_CONDITIONALS=true) the result is still False.
+# shell> ALLOW_BROKEN_CONDITIONALS=true ansible-playbook pb-test-selected.yml -e s="so-58363489"
+# ...
+#    msg: 'False'
+# ...
+#    msg: 'False'
