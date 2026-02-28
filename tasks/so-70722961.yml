@@ -1,0 +1,137 @@
+# https://stackoverflow.com/questions/70722961/how-to-create-conditional-list-in-ansible-task/
+
+# Q: How to create conditional list?
+
+- name: "A: Use the filter ternary."
+
+  vars:
+
+    endpoints1:
+      - {name: srv1, sans: [alt1, alt2]}
+      - {name: srv2, sans: [alt1, alt2]}
+    endpoints2:
+      - {name: srv1}
+      - {name: srv2}
+    domains:
+      - exampleA.com
+      - exampleB.com
+
+    _san1:
+      - "DNS:{{ item.0.name }}.{{ item.1 }}"
+      - "DNS:{{ item.0.name }}"
+      - "IP:127.0.0.1"
+    _sans: "{{ item.0.sans | d([]) }}"
+
+    _san2:
+      - "{{ _sans | join(',') | replace(',', '.' + item.1 + ', ') + '.' + item.1 }}"
+      - "{{ _sans | join(', ') }}"
+    _san: "{{ (_sans | length > 0) | ternary( _san1 + _san2, _san1) }}"
+
+  block:
+
+    - debug:
+        msg: |-
+          subject_alt_name:
+            {{ _san | to_nice_yaml | indent(2) }}
+      with_nested:
+        - "{{ endpoints1 }}"
+        - "{{ domains }}"
+
+#  msg: |-
+#    subject_alt_name:
+#      - DNS:srv1.exampleA.com
+#      - DNS:srv1
+#      - IP:127.0.0.1
+#      - alt1.exampleA.com, alt2.exampleA.com
+#      - alt1, alt2
+
+#  msg: |-
+#    subject_alt_name:
+#      - DNS:srv1.exampleB.com
+#      - DNS:srv1
+#      - IP:127.0.0.1
+#      - alt1.exampleB.com, alt2.exampleB.com
+#      - alt1, alt2
+
+#  msg: |-
+#    subject_alt_name:
+#      - DNS:srv2.exampleA.com
+#      - DNS:srv2
+#      - IP:127.0.0.1
+#      - alt1.exampleA.com, alt2.exampleA.com
+#      - alt1, alt2
+
+#  msg: |-
+#    subject_alt_name:
+#      - DNS:srv2.exampleB.com
+#      - DNS:srv2
+#      - IP:127.0.0.1
+#      - alt1.exampleB.com, alt2.exampleB.com
+#      - alt1, alt2
+
+    - debug:
+        msg: |-
+          subject_alt_name:
+            {{ _san | to_nice_yaml | indent(2) }}
+      with_nested:
+        - "{{ endpoints2 }}"
+        - "{{ domains }}"
+
+
+#     msg: |-
+#         subject_alt_name:
+#           - DNS:srv1.exampleA.com
+#           - DNS:srv1
+#           - IP:127.0.0.1
+
+#     msg: |-
+#         subject_alt_name:
+#           - DNS:srv1.exampleB.com
+#           - DNS:srv1
+#           - IP:127.0.0.1
+
+#     msg: |-
+#         subject_alt_name:
+#           - DNS:srv2.exampleA.com
+#           - DNS:srv2
+#           - IP:127.0.0.1
+
+#     msg: |-
+#         subject_alt_name:
+#           - DNS:srv2.exampleB.com
+#           - DNS:srv2
+#           - IP:127.0.0.1
+
+- name: "Optionally, use product and map to create the hosts."
+
+  vars:
+
+    endpoints:
+      - {name: srv1, sans: alt1}
+      - {name: srv2}
+
+    _san1:
+      - "A: {{ item.name }}"
+      - "B: {{ item.name }}"
+    _san2:
+      - "C: {{ item.sans | d('') }}"
+    _san: "{{ (item.sans | d('') | length > 0) | ternary( _san1 + _san2, _san1) }}"
+
+  block:
+
+    - debug:
+        msg: |-
+          subject_alt_name:
+            {{ _san | to_nice_yaml | indent(2) }}
+      loop: "{{ endpoints }}"
+
+#   msg: |-
+#       subject_alt_name:
+#         - 'A: srv1'
+#         - 'B: srv1'
+#         - 'C: alt1'
+
+#   msg: |-
+#       subject_alt_name:
+#         - 'A: srv2'
+#         - 'B: srv2'
