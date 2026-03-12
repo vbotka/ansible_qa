@@ -1,0 +1,65 @@
+# https://stackoverflow.com/questions/79905530/ansible-split-based-on-a-list-of-strings-and-with-the-input-being-a-list
+
+- name: "Q: Split based on a list of strings."
+  hosts: localhost
+
+  vars:
+
+    input_fqdns:
+      - host1.mydomain.internal
+      - host2.mydomain.net
+
+    known_domains:
+      - mydomain.internal
+      - mydomain.net
+
+    desired_output:
+      - {unqualified: 'host1', domain_name: 'mydomain.internal'}
+      - {unqualified: 'host2', domain_name: 'mydomain.net'}
+
+  tasks:
+
+    - name: Split by dots.
+      vars:
+        _split: "{{ input_fqdns | map('split', '.', 1) }}"
+        _output: "{{ _split | map('zip', ['unqualified', 'domain_name'])
+                            | map('map', 'reverse')
+                            | map('community.general.dict') }}"
+      debug:
+        msg: |
+          desired_output:
+            {{ _output | to_yaml(indent=2) | indent(2) }}
+
+#   msg: |-
+#       desired_output:
+#         - {domain_name: mydomain.internal, unqualified: host1}
+#         - {domain_name: mydomain.net, unqualified: host2}
+
+    - name: Split by regex.
+      vars:
+        _regex1: "\\.({{ known_domains | join('|') }})"
+        _unqualified: "{{ input_fqdns | map('regex_replace', _regex1, '') }}"
+        _regex2: "^.*({{ known_domains | join('|') }})"
+        _replace2: '\1'
+        _domain_name: "{{ input_fqdns | map('regex_replace', _regex2, _replace2) }}"
+        _output: "{{ _unqualified | zip(_domain_name)
+                                  | map('zip', ['unqualified', 'domain_name'])
+                                  | map('map', 'reverse') 
+                                  | map('community.general.dict') }}"
+      debug:
+        msg: |
+          _unqualified:
+            {{ _unqualified | to_yaml(indent=2) | indent(2) }}
+          _domain_name:
+            {{ _domain_name | to_yaml(indent=2) | indent(2) }}
+          desired_output:
+            {{ _output | to_yaml(indent=2) | indent(2) }}
+
+#   msg: |-
+#       _unqualified:
+#         [host1, host2]
+#        _domain_name:
+#         [mydomain.internal, mydomain.net]
+#       desired_output:
+#         - {domain_name: mydomain.internal, unqualified: host1}
+#         - {domain_name: mydomain.net, unqualified: host2}
