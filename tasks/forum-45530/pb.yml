@@ -1,0 +1,75 @@
+# https://forum.ansible.com/t/passing-condition-to-failed-when-as-a-variable/45530
+
+- hosts: localhost
+
+  vars:
+
+    my_task: "/tmp/my_commands/{{ ansible_loop.index }}-{{ item.0 }}.yml"
+    my_commands:
+      -
+        - "uname"
+        - "cmd_result.rc == 0"
+        - "(cmd_result.rc != 0) and ('Non-critical error' not in cmd_result.stderr)"
+      -
+        - "whoami"
+        - "cmd_result.rc == 0"
+        - "(cmd_result.rc != 0) and ('Non-critical error' not in cmd_result.stderr)"
+      -
+        - "false"
+        - "cmd_result.rc == 0"
+        - "(cmd_result.rc != 0) and ('Non-critical error' not in cmd_result.stderr)"
+
+  tasks:
+
+    - name: Create my commands.
+      run_once: true
+      delegate_to: localhost
+      block:
+
+        - name: Create directory for my commands.
+          file:
+            state: directory
+            path: /tmp/my_commands
+
+        - name: Create my commands.
+          copy:
+            dest: "{{ my_task }}"
+            content: |
+              ---
+              - name: My task
+                ansible.builtin.command: "{{ item.0 }}"
+                register: cmd_result
+                changed_when: "{{ item.1 }}"
+                failed_when: "{{ item.2 }}"
+          loop: "{{ my_commands }}"
+          loop_control: 
+            extended: true
+
+    - name: Execute my commands.
+      ansible.builtin.include_tasks: "{{ my_task }}"
+      loop: "{{ my_commands }}"
+      loop_control: 
+        extended: true
+
+# TASK [My task] ******************************************************************************************************
+# [ERROR]: Task failed: Module failed: non-zero return code
+# Origin: /tmp/my_commands/3-false.yml:2:3
+# 
+# 1 ---
+# 2 - name: My task
+#     ^ column 3
+# 
+# fatal: [localhost]: FAILED! => 
+#     changed: false
+#     cmd:
+#     - 'false'
+#     delta: '0:00:00.002765'
+#     end: '2026-03-16 02:38:27.588308'
+#     failed_when_result: true
+#     msg: non-zero return code
+#     rc: 1
+#     start: '2026-03-16 02:38:27.585543'
+#     stderr: ''
+#     stderr_lines: <omitted>
+#     stdout: ''
+#     stdout_lines: <omitted>
