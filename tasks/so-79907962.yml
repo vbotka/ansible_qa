@@ -1,0 +1,12 @@
+# https://stackoverflow.com/questions/79907962/split-2-dimentional-list-into-a-list-of-dictionaries-with-ansible
+
+- name: "Split 2-dimentional list into a list of dictionaries."
+  vars:
+    parent_list:
+      - [value1-1, value1-2]
+      - [value2-1, value2-2]
+    result: "{{ parent_list | map('zip', ['key1', 'key2'])
+                            | map('map', 'reverse')
+                            | map('community.general.dict') }}"
+  debug:
+    var: result
