@@ -1,0 +1,14 @@
+# https://unix.stackexchange.com/questions/805183/in-an-ansible-ini-file-does-a-blank-line-break-a-group
+#
+# Q: In an Ansible INI file, does a blank line break a group?
+
+[group1]
+foo
+bar
+baz
+
+# Comment
+quux
+
+[group2]
+xyzzy
