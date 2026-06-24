@@ -1,0 +1,29 @@
+# remove_keys_from_values: new filter plugin, remove keys with certain values #10139
+# https://github.com/ansible-collections/community.general/pull/10139
+
+- hosts: localhost
+
+  vars:
+
+    input:
+      - foo: bar
+        baz: bam
+        bam: ~
+      - foo:
+        bar: baz
+        baz:
+
+    r: "{{ input | map('dict2items')
+                 | map('rejectattr', 'value', 'none')
+                 | map('items2dict')
+                 | list }}"
+
+  tasks:
+
+    - debug:
+        var: r
+
+# r:
+#   - baz: bam
+#     foo: bar
+#   - bar: baz
