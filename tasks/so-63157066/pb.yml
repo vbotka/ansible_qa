@@ -1,0 +1,29 @@
+# Ansible - Get groups specific subgroups
+# https://stackoverflow.com/questions/63157066/ansible-get-groups-specific-subgroups
+#
+# Q:  "Get the names of the children groups of group['webservers']"
+
+- hosts: webservers
+
+  vars:
+
+    subgroups: "{{ groups.webservers
+                   | map('extract', hostvars, 'group_names')
+                   | flatten
+                   | unique
+                   | difference(['webservers']) }}"
+
+  tasks:
+
+    - debug:
+        var: subgroups
+      run_once: true
+
+#   - set_fact:
+#       subgroups: "{{ subgroups|default([]) + hostvars[item].group_names }}"
+#     loop: "{{ groups.webservers }}"
+#     run_once: true
+
+#   - debug:
+#       msg: "{{ subgroups | unique | difference(['webservers']) }}"
+#     run_once: true

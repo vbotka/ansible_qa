@@ -1,0 +1,11 @@
+[webservers]
+
+[server_storage]
+host_01
+
+[server_ws1]
+host_02
+
+[webservers:children]
+server_storage
+server_ws1
