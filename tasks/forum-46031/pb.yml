@@ -1,0 +1,43 @@
+# https://forum.ansible.com/t/looping-with-with-nested-wrong-syntax/46031
+
+# Q: Looping with_nested
+
+- hosts: localhost
+
+  vars:
+
+    variable_one:
+      - var_1_1
+      - var_1_2
+
+    variable_two:
+      - var_2_1
+      - var_2_2
+
+  tasks:
+
+    - debug:
+        msg: |
+          src: "my_source/mytemplate_{{ item.0 }}.j2"
+          dest: "my_destination/{{ item.0 }}_{{ item.1 }}.txt"
+      with_nested:
+        - "{{ variable_one }}"
+        - "{{ variable_two }}"
+
+# TASK [debug] **************************************
+# ok: [localhost] => (item=['var_1_1', 'var_2_1']) => 
+#     msg: |-
+#         src: "my_source/mytemplate_var_1_1.j2"
+#         dest: "my_destination/var_1_1_var_2_1.txt"
+# ok: [localhost] => (item=['var_1_1', 'var_2_2']) => 
+#     msg: |-
+#         src: "my_source/mytemplate_var_1_1.j2"
+#         dest: "my_destination/var_1_1_var_2_2.txt"
+# ok: [localhost] => (item=['var_1_2', 'var_2_1']) => 
+#     msg: |-
+#         src: "my_source/mytemplate_var_1_2.j2"
+#         dest: "my_destination/var_1_2_var_2_1.txt"
+# ok: [localhost] => (item=['var_1_2', 'var_2_2']) => 
+#     msg: |-
+#         src: "my_source/mytemplate_var_1_2.j2"
+#         dest: "my_destination/var_1_2_var_2_2.txt"
