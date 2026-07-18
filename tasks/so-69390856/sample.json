@@ -1,0 +1,14 @@
+{
+ "abc": {
+                "host": "xyz",
+                "version": "3.0.0-4"
+        },
+ "def": {               
+                "host": "xyz",
+                "version": "3.0.0-4"
+        },
+ "ghi": {
+                "host": "xyz",
+                "version": "4.1.0-4"
+ }
+}

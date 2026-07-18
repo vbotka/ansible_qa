@@ -1,0 +1,96 @@
+# https://stackoverflow.com/questions/69390856/how-to-replace-value-for-a-key-in-a-json-file-using-ansible/69391645
+#
+# Q: How to replace value for a key in a json file using ansible ?
+# A: <TBD>
+
+- hosts: localhost
+
+  vars:
+
+    new_version:
+      abc: 4.0.0-4
+      def: 4.0.0-4
+
+    update: "{{ new_version
+                | dict2items
+                | json_query('[].{key: key, value: {version: value}}')
+                | items2dict }}"
+    sample_update: "{{ sample | combine(update, recursive=true) }}"
+
+  tasks:
+
+    - include_vars:
+       file: sample.json
+       name: sample
+
+    - debug:
+        var: sample
+
+#   sample:
+#       abc:
+#           host: xyz
+#           version: 3.0.0-4
+#       def:
+#           host: xyz
+#           version: 3.0.0-4
+#       ghi:
+#           host: xyz
+#           version: 4.1.0-4
+
+    - set_fact:
+        sample1: "{{ sample1 | d(sample)
+                    | combine({ item.key: item.value
+                                | combine({ 'version': new_version[item.key] }) }) }}"
+      loop: "{{ sample | dict2items }}"
+      when: item.key in new_version
+
+    - debug:
+        var: sample1
+
+#   sample1:
+#       abc:
+#           host: xyz
+#           version: 4.0.0-4
+#       def:
+#           host: xyz
+#           version: 4.0.0-4
+#       ghi:
+#           host: xyz
+#           version: 4.1.0-4
+
+    - debug:
+        var: sample_update
+
+#   sample_update:
+#       abc:
+#           host: xyz
+#           version: 4.0.0-4
+#       def:
+#           host: xyz
+#           version: 4.0.0-4
+#       ghi:
+#           host: xyz
+#           version: 4.1.0-4
+
+    - set_fact:
+        sample2: "{{ sample2 | d(sample)
+                     | combine({ item.key: item.value
+                                 | combine({ 'version': new_version }) }) }}"
+      loop: "{{ sample | dict2items }}"
+      when: item.value.version is version(new_version, 'lt')
+      vars:
+        new_version: 4.0.0-4
+
+    - debug:
+        var: sample2
+
+#   sample2:
+#       abc:
+#           host: xyz
+#           version: 4.0.0-4
+#       def:
+#           host: xyz
+#           version: 4.0.0-4
+#       ghi:
+#           host: xyz
+#           version: 4.1.0-4
